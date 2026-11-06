@@ -23,6 +23,23 @@ is never inferred as supported.
 - Optional CloudNativePG-backed authentication and persistence.
 - Read-only Trivy Operator integration with bounded, sanitized security details.
 
+## What provides each view
+
+The base inventory requires only the Kubernetes API and Kubit's read-only
+ClusterRole. Additional views appear when their producers are installed:
+
+| Information in Kubit | Additional requirement |
+| --- | --- |
+| Nodes, runtimes, workloads, images, CRDs | none beyond Kubernetes API + Kubit RBAC |
+| Argo CD application ownership and sync/health | Argo CD CRDs and the optional Argo CD read permission |
+| CVEs, misconfigurations, exposed secrets, SBOMs | Trivy Operator report CRDs and the optional Trivy read permission |
+| Prometheus time series and alerts | Prometheus scraping Kubit's `/metrics`; Kubit does not query Prometheus |
+| Grafana dashboard | Grafana dashboard-sidecar discovery |
+| Authentication and retained history | PostgreSQL or the optional CloudNativePG component |
+
+See [`docs/integrations.md`](docs/integrations.md) for official repositories,
+installation examples, configuration switches, exact RBAC, and data direction.
+
 ## Project status
 
 Kubit is currently an early-stage project. The source version is `1.4.0`.

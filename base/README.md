@@ -39,6 +39,11 @@ patches:
         SCAN_INTERVAL_SECONDS: "600"
 ```
 
+`ARGOCD_APPLICATIONS_ENABLED` and `TRIVY_REPORTS_ENABLED` disable optional API
+queries. The base ClusterRole grants read-only access to both integrations; an
+overlay enforcing minimum permissions can also remove the disabled API group's
+rule. Helm performs that RBAC pruning automatically.
+
 Pin remote bases to a release tag. Do not use `main` for deployments. Keep
 database credentials and other secrets outside this repository and reference
 Secrets managed by the target environment.

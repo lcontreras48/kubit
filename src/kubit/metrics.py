@@ -91,6 +91,9 @@ def render(
     security_summary = security.get("summary", {})
     lines.extend(
         [
+            "# HELP kubit_security_collector_enabled Whether Trivy report collection is enabled.",
+            "# TYPE kubit_security_collector_enabled gauge",
+            f"kubit_security_collector_enabled {1 if security.get('enabled', True) else 0}",
             "# HELP kubit_security_collector_available Whether Trivy report APIs were readable.",
             "# TYPE kubit_security_collector_available gauge",
             f"kubit_security_collector_available {1 if security.get('available') else 0}",

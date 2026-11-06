@@ -5,6 +5,11 @@ from kubit.models import Component, ProviderState, Result
 
 
 class MetricsTest(unittest.TestCase):
+    def test_marks_disabled_security_collection(self):
+        output = render([], [], True, 0, security={"enabled": False})
+        self.assertIn("kubit_security_collector_enabled 0", output)
+        self.assertIn("kubit_security_collector_available 0", output)
+
     def test_exports_evidence_state_and_stale_result(self):
         output = render(
             [
@@ -65,6 +70,7 @@ class MetricsTest(unittest.TestCase):
         self.assertIn('kubit_component_runtime_pods{component="cloudnativepg"', output)
         self.assertIn('kubit_evidence_provider_info{provider="cnpg"', output)
         self.assertIn("kubit_security_collector_available 1", output)
+        self.assertIn("kubit_security_collector_enabled 1", output)
         self.assertIn('kubit_security_summary{finding_type="vulnerabilities"} 3', output)
         self.assertIn('kubit_security_coverage_containers{state="covered"} 1', output)
         self.assertIn('kubit_security_report_findings{report_type="vulnerability"', output)

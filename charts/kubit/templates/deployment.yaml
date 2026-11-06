@@ -55,6 +55,10 @@ spec:
               value: {{ int .Values.config.catalogEvidenceMaxAgeDays | quote }}
             - name: SECURITY_REPORT_STALE_AFTER_SECONDS
               value: {{ int .Values.config.securityReportStaleAfterSeconds | quote }}
+            - name: ARGOCD_APPLICATIONS_ENABLED
+              value: {{ .Values.integrations.argocd.enabled | quote }}
+            - name: TRIVY_REPORTS_ENABLED
+              value: {{ .Values.integrations.trivyOperator.enabled | quote }}
             - name: SOURCE_VALIDATION_TIMEOUT_SECONDS
               value: {{ .Values.config.sourceValidation.timeoutSeconds | quote }}
             - name: SOURCE_VALIDATION_MAX_BYTES

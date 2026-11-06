@@ -176,6 +176,18 @@ class CollectorSecurityTest(unittest.TestCase):
 
 
 class CollectorTest(unittest.TestCase):
+    def test_argocd_discovery_can_be_disabled(self):
+        class NoArgoAPI(FakeAPI):
+            def get_optional(self, path):
+                if path.startswith("/apis/argoproj.io/"):
+                    self.fail = True
+                    raise AssertionError("Argo CD API must not be queried")
+                return super().get_optional(path)
+
+        api = NoArgoAPI()
+        Collector(api, discover_argocd=False).collect()
+        self.assertFalse(getattr(api, "fail", False))
+
     def test_collects_core_and_known_workload_components(self):
         components = Collector(FakeAPI()).collect()
         versions = {(item.name, item.version) for item in components}

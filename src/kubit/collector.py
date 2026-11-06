@@ -98,8 +98,9 @@ class Collector:
         "cilium": "cilium",
     }
 
-    def __init__(self, api: KubernetesAPI):
+    def __init__(self, api: KubernetesAPI, discover_argocd: bool = True):
         self.api = api
+        self.discover_argocd = discover_argocd
 
     def collect(self) -> list[Component]:
         components: list[Component] = []
@@ -108,8 +109,12 @@ class Collector:
         components.extend(self._nodes(self.api.get("/api/v1/nodes").get("items", [])))
         pods = self.api.get("/api/v1/pods").get("items", [])
         replicasets = self.api.get("/apis/apps/v1/replicasets").get("items", [])
-        applications = self._applications(
-            self.api.get_optional("/apis/argoproj.io/v1alpha1/applications").get("items", [])
+        applications = (
+            self._applications(
+                self.api.get_optional("/apis/argoproj.io/v1alpha1/applications").get("items", [])
+            )
+            if self.discover_argocd
+            else {}
         )
         resource_owners = self._application_resources(applications)
         pod_runtime = self._pod_runtime(pods, replicasets)

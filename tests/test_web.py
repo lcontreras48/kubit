@@ -9,6 +9,7 @@ from kubit.app import (
     WEB_ASSETS,
     WEB_ROOT,
     current_report,
+    environment_flag,
     require_discovered_component,
 )
 from kubit.models import Component
@@ -16,6 +17,13 @@ from kubit.source_validation import SourceValidationError
 
 
 class WebInterfaceTest(unittest.TestCase):
+    def test_optional_integration_environment_flags(self):
+        with patch("kubit.app.os.getenv", return_value=None):
+            self.assertTrue(environment_flag("EXAMPLE"))
+        for value in ("false", "0", "no", "off"):
+            with self.subTest(value=value), patch("kubit.app.os.getenv", return_value=value):
+                self.assertFalse(environment_flag("EXAMPLE"))
+
     def test_release_version_matches_deployment_artifacts(self):
         root = Path(__file__).parents[1]
         version_match = re.search(

@@ -73,6 +73,16 @@ config:
     globalLoginAttemptsPerMinute: 60
     scanHistoryRetentionDays: 30
 
+# Optional cluster data sources. Kubit reads both through the Kubernetes API;
+# it never contacts either project's repository at runtime.
+integrations:
+  # https://github.com/argoproj/argo-cd
+  argocd:
+    enabled: true
+  # https://github.com/aquasecurity/trivy-operator
+  trivyOperator:
+    enabled: true
+
 # Additional container environment entries in Kubernetes EnvVar format.
 extraEnv: []
 extraEnvFrom: []
@@ -108,6 +118,7 @@ affinity: {}
 topologySpreadConstraints: []
 
 serviceMonitor:
+  # Prometheus scrapes Kubit's /metrics endpoint; Kubit does not query Prometheus.
   enabled: false
   labels: {}
   interval: 5m

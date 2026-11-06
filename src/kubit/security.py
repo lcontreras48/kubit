@@ -179,6 +179,7 @@ class SecurityCollector:
         else:
             status = "fresh"
         return {
+            "enabled": True,
             "available": available,
             "status": status,
             "collected_at": now.isoformat().replace("+00:00", "Z"),
@@ -199,7 +200,7 @@ class SecurityCollector:
         }
 
 
-def empty_security() -> dict:
+def empty_security(enabled: bool = True) -> dict:
     summary = {severity: 0 for severity in SEVERITIES}
     summary.update(
         vulnerabilities=0,
@@ -212,6 +213,7 @@ def empty_security() -> dict:
         covered_containers=0,
     )
     return {
+        "enabled": enabled,
         "available": False,
         "status": "unknown",
         "collected_at": "",

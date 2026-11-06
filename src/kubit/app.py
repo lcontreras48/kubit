@@ -30,6 +30,13 @@ WEB_ASSETS = {
 }
 
 
+def environment_flag(name: str, default: bool = True) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() not in {"0", "false", "no", "off"}
+
+
 class State:
     def __init__(self):
         self.lock = threading.Lock()
@@ -81,7 +88,10 @@ def scanner(state: State, interval: int, providers: ProviderManager, store: Post
         started = time.monotonic()
         try:
             api = KubernetesAPI()
-            components = Collector(api).collect()
+            components = Collector(
+                api,
+                discover_argocd=environment_flag("ARGOCD_APPLICATIONS_ENABLED"),
+            ).collect()
             signature = tuple(
                 (
                     item.name,
@@ -97,12 +107,15 @@ def scanner(state: State, interval: int, providers: ProviderManager, store: Post
                 components=components,
             )
             results = Engine(rule_document).evaluate(components)
-            try:
-                security = SecurityCollector(api).collect(components)
-            except Exception:
-                LOG.exception("security report collection failed")
-                security = empty_security()
-                security["errors"] = ["security report collection failed"]
+            if environment_flag("TRIVY_REPORTS_ENABLED"):
+                try:
+                    security = SecurityCollector(api).collect(components)
+                except Exception:
+                    LOG.exception("security report collection failed")
+                    security = empty_security()
+                    security["errors"] = ["security report collection failed"]
+            else:
+                security = empty_security(enabled=False)
             state.update(
                 components,
                 results,

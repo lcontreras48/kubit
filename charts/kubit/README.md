@@ -24,6 +24,19 @@ helm template kubit ./charts/kubit --namespace kubit \
 
 ## Common configurations
 
+Optional API readers and their RBAC rules can be disabled together:
+
+```yaml
+integrations:
+  argocd:
+    enabled: false
+  trivyOperator:
+    enabled: false
+```
+
+Prometheus is an output integration: it scrapes Kubit. Enable the following
+resources only when the Prometheus Operator CRDs exist in the target cluster.
+
 Enable resources consumed by Prometheus Operator and a Grafana dashboard
 sidecar:
 
