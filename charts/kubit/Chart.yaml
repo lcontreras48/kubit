@@ -1,0 +1,17 @@
+apiVersion: v2
+name: kubit
+description: Evidence-based Kubernetes compatibility monitor
+type: application
+version: 1.3.0
+appVersion: "1.3.0"
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/lcontreras48/kubit
+sources:
+  - https://github.com/lcontreras48/kubit
+keywords:
+  - kubernetes
+  - compatibility
+  - observability
+annotations:
+  artifacthub.io/license: Apache-2.0
+

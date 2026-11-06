@@ -1,0 +1,159 @@
+replicaCount: 1
+
+image:
+  repository: kubit
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+rbac:
+  create: true
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 65532
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: kubit.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+config:
+  clusterName: cluster
+  logLevel: INFO
+  scanIntervalSeconds: 900
+  evidenceRefreshIntervalSeconds: 21600
+  evidenceStaleAfterSeconds: 604800
+  catalogEvidenceMaxAgeDays: 180
+  securityReportStaleAfterSeconds: 86400
+  sourceValidation:
+    timeoutSeconds: 8
+    maxBytes: 1048576
+    maxRedirects: 5
+    ticketTtlSeconds: 600
+    maxConcurrent: 2
+    attemptsPerMinute: 10
+  auth:
+    sessionHours: 12
+    secureCookies: true
+    loginAttemptsPerMinute: 10
+    globalLoginAttemptsPerMinute: 60
+    scanHistoryRetentionDays: 30
+
+# Additional container environment entries in Kubernetes EnvVar format.
+extraEnv: []
+extraEnvFrom: []
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 100Mi
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 20m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 512Mi
+
+probes:
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  liveness:
+    initialDelaySeconds: 10
+    periodSeconds: 30
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+serviceMonitor:
+  enabled: false
+  labels: {}
+  interval: 5m
+  scrapeTimeout: 30s
+
+prometheusRule:
+  enabled: false
+  labels: {}
+  scanFailedFor: 20m
+  scanStaleAfterSeconds: 1800
+  scanStaleFor: 10m
+
+grafanaDashboard:
+  enabled: false
+  labels:
+    grafana_dashboard: "1"
+  annotations: {}
+
+# Connect Kubit to a PostgreSQL database. Prefer existingSecret over url so
+# credentials are not stored in a values file.
+database:
+  enabled: false
+  url: ""
+  existingSecret: ""
+  existingSecretKey: database-url
+  bootstrapAdmin:
+    username: admin
+    existingSecret: ""
+    existingSecretKey: bootstrap-admin-password
+
+# Optionally create a CloudNativePG Cluster. The operator and the two referenced
+# Secrets must already exist. Enabling this also enables database integration.
+postgresql:
+  enabled: false
+  instances: 1
+  existingAppSecret: ""
+  database: kubit
+  owner: kubit
+  storage:
+    size: 5Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 25m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+

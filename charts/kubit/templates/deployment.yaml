@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubit.fullname" . }}
+  labels:
+    {{- include "kubit.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kubit.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kubit.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "kubit.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: kubit
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PORT
+              value: {{ int .Values.service.port | quote }}
+            - name: CACHE_DIR
+              value: /var/cache/kubit
+            - name: CLUSTER_NAME
+              value: {{ .Values.config.clusterName | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            - name: SCAN_INTERVAL_SECONDS
+              value: {{ int .Values.config.scanIntervalSeconds | quote }}
+            - name: EVIDENCE_REFRESH_INTERVAL_SECONDS
+              value: {{ int .Values.config.evidenceRefreshIntervalSeconds | quote }}
+            - name: EVIDENCE_STALE_AFTER_SECONDS
+              value: {{ int .Values.config.evidenceStaleAfterSeconds | quote }}
+            - name: CATALOG_EVIDENCE_MAX_AGE_DAYS
+              value: {{ int .Values.config.catalogEvidenceMaxAgeDays | quote }}
+            - name: SECURITY_REPORT_STALE_AFTER_SECONDS
+              value: {{ int .Values.config.securityReportStaleAfterSeconds | quote }}
+            - name: SOURCE_VALIDATION_TIMEOUT_SECONDS
+              value: {{ .Values.config.sourceValidation.timeoutSeconds | quote }}
+            - name: SOURCE_VALIDATION_MAX_BYTES
+              value: {{ int .Values.config.sourceValidation.maxBytes | quote }}
+            - name: SOURCE_VALIDATION_MAX_REDIRECTS
+              value: {{ int .Values.config.sourceValidation.maxRedirects | quote }}
+            - name: SOURCE_VALIDATION_TICKET_TTL_SECONDS
+              value: {{ int .Values.config.sourceValidation.ticketTtlSeconds | quote }}
+            - name: SOURCE_VALIDATION_MAX_CONCURRENT
+              value: {{ int .Values.config.sourceValidation.maxConcurrent | quote }}
+            - name: SOURCE_VALIDATION_ATTEMPTS_PER_MINUTE
+              value: {{ int .Values.config.sourceValidation.attemptsPerMinute | quote }}
+            - name: AUTH_SESSION_HOURS
+              value: {{ int .Values.config.auth.sessionHours | quote }}
+            - name: AUTH_SECURE_COOKIES
+              value: {{ .Values.config.auth.secureCookies | quote }}
+            - name: AUTH_LOGIN_ATTEMPTS_PER_MINUTE
+              value: {{ int .Values.config.auth.loginAttemptsPerMinute | quote }}
+            - name: AUTH_GLOBAL_LOGIN_ATTEMPTS_PER_MINUTE
+              value: {{ int .Values.config.auth.globalLoginAttemptsPerMinute | quote }}
+            - name: SCAN_HISTORY_RETENTION_DAYS
+              value: {{ int .Values.config.auth.scanHistoryRetentionDays | quote }}
+            {{- if .Values.postgresql.enabled }}
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgresql.owner }}@{{ include "kubit.fullname" . }}-db-rw:5432/{{ .Values.postgresql.database }}"
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "postgresql.existingAppSecret is required when postgresql.enabled=true" .Values.postgresql.existingAppSecret }}
+                  key: password
+            {{- else if .Values.database.enabled }}
+            {{- if .Values.database.existingSecret }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: {{ .Values.database.existingSecretKey }}
+            {{- else }}
+            - name: DATABASE_URL
+              value: {{ required "database.url or database.existingSecret is required when database.enabled=true" .Values.database.url | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if or .Values.database.enabled .Values.postgresql.enabled }}
+            - name: KUBIT_BOOTSTRAP_ADMIN_USERNAME
+              value: {{ .Values.database.bootstrapAdmin.username | quote }}
+            {{- if .Values.database.bootstrapAdmin.existingSecret }}
+            - name: KUBIT_BOOTSTRAP_ADMIN_PASSWORD_FILE
+              value: /var/run/secrets/kubit-auth/bootstrap-admin-password
+            {{- end }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            {{- toYaml .Values.probes.readiness | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            {{- toYaml .Values.probes.liveness | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: evidence-cache
+              mountPath: /var/cache/kubit
+            {{- if and (or .Values.database.enabled .Values.postgresql.enabled) .Values.database.bootstrapAdmin.existingSecret }}
+            - name: bootstrap-admin
+              mountPath: /var/run/secrets/kubit-auth
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: evidence-cache
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "kubit.cacheClaimName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if and (or .Values.database.enabled .Values.postgresql.enabled) .Values.database.bootstrapAdmin.existingSecret }}
+        - name: bootstrap-admin
+          secret:
+            secretName: {{ .Values.database.bootstrapAdmin.existingSecret }}
+            items:
+              - key: {{ .Values.database.bootstrapAdmin.existingSecretKey }}
+                path: bootstrap-admin-password
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- tpl (toYaml .Values.topologySpreadConstraints) . | nindent 8 }}
+      {{- else }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "kubit.selectorLabels" . | nindent 14 }}
+      {{- end }}
+

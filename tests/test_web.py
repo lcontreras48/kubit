@@ -16,7 +16,7 @@ from kubit.source_validation import SourceValidationError
 
 
 class WebInterfaceTest(unittest.TestCase):
-    def test_release_version_is_visible_and_matches_sandbox_image_tag(self):
+    def test_release_version_matches_deployment_artifacts(self):
         root = Path(__file__).parents[1]
         version_match = re.search(
             r'^version = "([0-9]+\.[0-9]+\.[0-9]+)"$',
@@ -27,14 +27,20 @@ class WebInterfaceTest(unittest.TestCase):
         version = version_match.group(1)
         overlay = (root / "envs" / "sandbox" / "kustomization.yaml").read_text()
         self.assertRegex(version, r"^[0-9]+\.[0-9]+\.[0-9]+$")
-        self.assertRegex(overlay, r"newTag: [0-9]+\.[0-9]+\.[0-9]+")
+        self.assertIn(f"newTag: {version}", overlay)
         self.assertNotIn("newTag: main", overlay)
+        chart = (root / "charts" / "kubit" / "Chart.yaml").read_text()
+        self.assertIn(f'appVersion: "{version}"', chart)
         workflow = (root / ".github" / "workflows" / "ci.yml").read_text()
         self.assertIn("python3 -m unittest discover -s tests -v", workflow)
 
     def test_grafana_dashboard_exposes_reasons_sources_and_filters(self):
-        dashboard = json.loads(
-            (Path(__file__).parents[1] / "base" / "monitoring" / "dashboard.json").read_text()
+        root = Path(__file__).parents[1]
+        dashboard_source = (root / "base" / "monitoring" / "dashboard.json").read_text()
+        dashboard = json.loads(dashboard_source)
+        self.assertEqual(
+            dashboard_source,
+            (root / "charts" / "kubit" / "files" / "dashboards" / "kubit-compatibility.json").read_text(),
         )
         panels = {panel["title"]: panel for panel in dashboard["panels"]}
         self.assertIn("Action required", panels)

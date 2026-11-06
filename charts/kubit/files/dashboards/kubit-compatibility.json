@@ -1,0 +1,152 @@
+{
+  "annotations": {"list": []},
+  "description": "Evidence-based Kubernetes compatibility status with decision reasons and upstream sources from Kubit.",
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "fixedColor", "fixedColor": "green"}, "decimals": 0}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "kubit_compatibility_results{status=\"supported\"}", "instant": true, "legendFormat": "Supported", "range": false, "refId": "A"}],
+      "title": "Supported checks",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "kubit_compatibility_results{status=\"unsupported\"}", "instant": true, "legendFormat": "Unsupported", "range": false, "refId": "A"}],
+      "title": "Unsupported checks",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "kubit_compatibility_results{status=\"incompatible\"}", "instant": true, "legendFormat": "Incompatible", "range": false, "refId": "A"}],
+      "title": "Incompatible checks",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "fixedColor", "fixedColor": "orange"}, "decimals": 0}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
+      "id": 4,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "sum(kubit_compatibility_results{status=~\"unknown|stale\"})", "instant": true, "legendFormat": "Unverified", "range": false, "refId": "A"}],
+      "title": "Unverified checks",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 0},
+      "id": 5,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "sum(max by (provider) (kubit_evidence_provider_info{status!~\"fresh|cached\"})) or vector(0)", "instant": true, "legendFormat": "Provider issues", "range": false, "refId": "A"}],
+      "title": "Evidence source issues",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 0},
+      "id": 6,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "kubit_last_scan_success", "instant": true, "legendFormat": "Scanner", "range": false, "refId": "A"}],
+      "title": "Scanner health",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Explicitly incompatible or outside upstream's supported release window. Resolve these before a Kubernetes upgrade.",
+      "fieldConfig": {"defaults": {}, "overrides": [
+        {"matcher": {"id": "byName", "options": "Status"}, "properties": [{"id": "mappings", "value": [{"options": {"incompatible": {"color": "red", "index": 0, "text": "Incompatible"}, "unsupported": {"color": "red", "index": 1, "text": "Unsupported"}}, "type": "value"}]}, {"id": "custom.cellOptions", "value": {"type": "color-background"}}]},
+        {"matcher": {"id": "byName", "options": "Source URL"}, "properties": [{"id": "links", "value": [{"targetBlank": true, "title": "Open official evidence", "url": "${__value.raw}"}]}]}
+      ]},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 4},
+      "id": 7,
+      "options": {"cellHeight": "sm", "showHeader": true},
+      "targets": [{"editorMode": "code", "expr": "max by (component, version, component_namespace, component_instance, dependency, dependency_version, status, reason, evidence_provider, evidence_title, evidence_url) (kubit_compatibility_status{status=~\"incompatible|unsupported\",reason!=\"\",component_instance!=\"\"})", "format": "table", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A"}],
+      "title": "Action required",
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "Value": true, "__name__": true, "job": true, "endpoint": true, "service": true, "namespace": true, "pod": true}, "indexByName": {"component": 0, "version": 1, "component_namespace": 2, "component_instance": 3, "status": 4, "dependency": 5, "dependency_version": 6, "reason": 7, "evidence_provider": 8, "evidence_title": 9, "evidence_url": 10}, "renameByName": {"component": "Component", "version": "Deployed version", "component_namespace": "Namespace", "component_instance": "Node / instance", "status": "Status", "dependency": "Verified against", "dependency_version": "Dependency version", "reason": "Why", "evidence_provider": "Provider", "evidence_title": "Source", "evidence_url": "Source URL"}}}],
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Detected components for which current evidence cannot establish support. These are not treated as compatible.",
+      "fieldConfig": {"defaults": {}, "overrides": [
+        {"matcher": {"id": "byName", "options": "Status"}, "properties": [{"id": "mappings", "value": [{"options": {"stale": {"color": "orange", "index": 0, "text": "Stale evidence"}, "unknown": {"color": "orange", "index": 1, "text": "Unverified"}}, "type": "value"}]}, {"id": "custom.cellOptions", "value": {"type": "color-background"}}]},
+        {"matcher": {"id": "byName", "options": "Source URL"}, "properties": [{"id": "links", "value": [{"targetBlank": true, "title": "Open available evidence", "url": "${__value.raw}"}]}]}
+      ]},
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 12},
+      "id": 8,
+      "options": {"cellHeight": "sm", "showHeader": true},
+      "targets": [{"editorMode": "code", "expr": "max by (component, version, component_namespace, component_instance, dependency, dependency_version, status, reason, evidence_provider, evidence_title, evidence_url) (kubit_compatibility_status{status=~\"unknown|stale\",reason!=\"\",component_instance!=\"\"})", "format": "table", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A"}],
+      "title": "Unverified components",
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "Value": true, "__name__": true, "job": true, "endpoint": true, "service": true, "namespace": true, "pod": true}, "indexByName": {"component": 0, "version": 1, "component_namespace": 2, "component_instance": 3, "status": 4, "dependency": 5, "dependency_version": 6, "reason": 7, "evidence_provider": 8, "evidence_title": 9, "evidence_url": 10}, "renameByName": {"component": "Component", "version": "Deployed version", "component_namespace": "Namespace", "component_instance": "Node / instance", "status": "Status", "dependency": "Verified against", "dependency_version": "Dependency version", "reason": "Why", "evidence_provider": "Provider", "evidence_title": "Source", "evidence_url": "Source URL"}}}],
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Complete compatibility graph. Use the Component and Status filters at the top of the dashboard.",
+      "fieldConfig": {"defaults": {}, "overrides": [
+        {"matcher": {"id": "byName", "options": "Status"}, "properties": [{"id": "mappings", "value": [{"options": {"incompatible": {"color": "red", "index": 0, "text": "Incompatible"}, "stale": {"color": "orange", "index": 1, "text": "Stale evidence"}, "supported": {"color": "green", "index": 2, "text": "Supported"}, "unknown": {"color": "orange", "index": 3, "text": "Unverified"}, "unsupported": {"color": "red", "index": 4, "text": "Unsupported"}}, "type": "value"}]}, {"id": "custom.cellOptions", "value": {"type": "color-background"}}]},
+        {"matcher": {"id": "byName", "options": "Source URL"}, "properties": [{"id": "links", "value": [{"targetBlank": true, "title": "Open official evidence", "url": "${__value.raw}"}]}]}
+      ]},
+      "gridPos": {"h": 12, "w": 24, "x": 0, "y": 22},
+      "id": 9,
+      "options": {"cellHeight": "sm", "showHeader": true},
+      "targets": [{"editorMode": "code", "expr": "max by (component, version, component_namespace, component_instance, dependency, dependency_version, status, reason, evidence_provider, evidence_title, evidence_url) (kubit_compatibility_status{component=~\"$component\",status=~\"$status\",reason!=\"\",component_instance!=\"\"})", "format": "table", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A"}],
+      "title": "Compatibility matrix",
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "Value": true, "__name__": true, "job": true, "endpoint": true, "service": true, "namespace": true, "pod": true}, "indexByName": {"component": 0, "version": 1, "component_namespace": 2, "component_instance": 3, "status": 4, "dependency": 5, "dependency_version": 6, "reason": 7, "evidence_provider": 8, "evidence_title": 9, "evidence_url": 10}, "renameByName": {"component": "Component", "version": "Deployed version", "component_namespace": "Namespace", "component_instance": "Node / instance", "status": "Status", "dependency": "Verified against", "dependency_version": "Dependency version", "reason": "Why", "evidence_provider": "Provider", "evidence_title": "Source", "evidence_url": "Source URL"}}}],
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Automatic upstream evidence providers and their current refresh state.",
+      "fieldConfig": {"defaults": {}, "overrides": [
+        {"matcher": {"id": "byName", "options": "State"}, "properties": [{"id": "mappings", "value": [{"options": {"cached": {"color": "blue", "index": 0, "text": "Cached"}, "fresh": {"color": "green", "index": 1, "text": "Fresh"}, "stale": {"color": "orange", "index": 2, "text": "Stale"}, "unavailable": {"color": "red", "index": 3, "text": "Unavailable"}}, "type": "value"}]}, {"id": "custom.cellOptions", "value": {"type": "color-background"}}]},
+        {"matcher": {"id": "byName", "options": "Official source"}, "properties": [{"id": "links", "value": [{"targetBlank": true, "title": "Open provider source", "url": "${__value.raw}"}]}]}
+      ]},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 34},
+      "id": 10,
+      "options": {"cellHeight": "sm", "showHeader": true},
+      "targets": [{"editorMode": "code", "expr": "max by (provider, status, source_url, checksum) (kubit_evidence_provider_info)", "format": "table", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A"}],
+      "title": "Sources of truth",
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "Value": true, "__name__": true, "job": true, "endpoint": true, "service": true, "namespace": true, "pod": true}, "indexByName": {"provider": 0, "status": 1, "source_url": 2, "checksum": 3}, "renameByName": {"provider": "Provider", "status": "State", "source_url": "Official source", "checksum": "SHA-256"}}}],
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 34},
+      "id": 11,
+      "options": {"cellHeight": "sm", "showHeader": true},
+      "targets": [{"editorMode": "code", "expr": "max by (component, version, component_namespace, component_instance, source) (kubit_component_info{component=~\"$component\",component_instance!=\"\"})", "format": "table", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A"}],
+      "title": "Discovered inventory",
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "Value": true, "__name__": true, "job": true, "endpoint": true, "service": true, "namespace": true, "pod": true}, "indexByName": {"component": 0, "version": 1, "component_namespace": 2, "component_instance": 3, "source": 4}, "renameByName": {"component": "Component", "version": "Version", "component_namespace": "Namespace", "component_instance": "Node / instance", "source": "Discovered from"}}}],
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 40,
+  "tags": ["kubit", "kubernetes", "compatibility"],
+  "templating": {"list": [
+    {"allValue": ".*", "current": {"selected": true, "text": "All", "value": "$__all"}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "definition": "label_values(kubit_compatibility_status, component)", "hide": 0, "includeAll": true, "label": "Component", "multi": true, "name": "component", "options": [], "query": {"query": "label_values(kubit_compatibility_status, component)", "refId": "StandardVariableQuery"}, "refresh": 1, "regex": "", "skipUrlSync": false, "sort": 1, "type": "query"},
+    {"allValue": ".*", "current": {"selected": true, "text": "All", "value": "$__all"}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "definition": "label_values(kubit_compatibility_status, status)", "hide": 0, "includeAll": true, "label": "Status", "multi": true, "name": "status", "options": [], "query": {"query": "label_values(kubit_compatibility_status, status)", "refId": "StandardVariableQuery"}, "refresh": 1, "regex": "", "skipUrlSync": false, "sort": 1, "type": "query"}
+  ]},
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "Kubit / Cluster Compatibility",
+  "uid": "kubit-compatibility",
+  "version": 2
+}

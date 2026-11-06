@@ -1,0 +1,56 @@
+{{- if .Values.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "kubit.fullname" . }}
+  labels:
+    {{- include "kubit.labels" . | nindent 4 }}
+    {{- with .Values.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+    - name: kubit.compatibility
+      rules:
+        - alert: KubitCompatibilityScanFailed
+          expr: kubit_last_scan_success == 0
+          for: {{ .Values.prometheusRule.scanFailedFor }}
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubit cannot evaluate cluster compatibility
+            description: Kubit scans have been failing.
+        - alert: KubitCompatibilityScanStale
+          expr: absent(kubit_last_scan_timestamp_seconds) or (time() - kubit_last_scan_timestamp_seconds > {{ .Values.prometheusRule.scanStaleAfterSeconds }})
+          for: {{ .Values.prometheusRule.scanStaleFor }}
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubit compatibility data is stale
+            description: No Kubit scan has completed within the configured threshold.
+        - alert: KubitIncompatibleComponent
+          expr: kubit_compatibility_results{status="incompatible"} > 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: An incompatible cluster component was detected
+            description: Kubit found at least one compatibility rule violation.
+        - alert: KubitUnsupportedComponent
+          expr: kubit_compatibility_results{status="unsupported"} > 0
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: An unsupported cluster component was detected
+            description: Kubit found a component outside its official support window or matrix.
+        - alert: KubitEvidenceProviderDegraded
+          expr: kubit_evidence_provider_info{status=~"stale|unavailable"} == 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubit compatibility evidence is degraded
+            description: An evidence provider is stale or unavailable.
+{{- end }}
+

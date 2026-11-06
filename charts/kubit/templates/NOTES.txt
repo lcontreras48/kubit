@@ -1,0 +1,12 @@
+Kubit is installed in namespace {{ .Release.Namespace }}.
+
+Check the deployment:
+  kubectl -n {{ .Release.Namespace }} rollout status deployment/{{ include "kubit.fullname" . }}
+
+Open the dashboard locally:
+  kubectl -n {{ .Release.Namespace }} port-forward service/{{ include "kubit.fullname" . }} 8080:{{ .Values.service.port }}
+  http://127.0.0.1:8080
+
+Run the chart test:
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+

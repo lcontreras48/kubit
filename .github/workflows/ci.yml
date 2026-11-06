@@ -24,3 +24,19 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Validate Grafana dashboard JSON
         run: python3 -m json.tool base/monitoring/dashboard.json >/dev/null
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+      - name: Validate Helm chart
+        run: |
+          helm lint charts/kubit
+          helm lint charts/kubit -f charts/kubit/examples/values-observability.yaml
+          helm lint charts/kubit -f charts/kubit/examples/values-cnpg.yaml
+          helm template kubit charts/kubit --namespace kubit >/dev/null
+          helm template kubit charts/kubit --namespace kubit \
+            --set serviceMonitor.enabled=true \
+            --set prometheusRule.enabled=true \
+            --set grafanaDashboard.enabled=true \
+            --set postgresql.enabled=true \
+            --set postgresql.existingAppSecret=kubit-db-app \
+            --set database.bootstrapAdmin.existingSecret=kubit-bootstrap-admin \
+            >/dev/null

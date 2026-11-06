@@ -25,7 +25,7 @@ is never inferred as supported.
 
 ## Project status
 
-Kubit is currently a sandbox-stage project. The source version is `1.2.2`.
+Kubit is currently a sandbox-stage project. The source version is `1.3.0`.
 Production use requires an explicit review of high availability, database
 recovery, provider coverage, resource sizing, and cluster security policy.
 
@@ -37,6 +37,7 @@ base/                      reusable Kubernetes and monitoring resources
 base/monitoring/           ServiceMonitor, PrometheusRule, and Grafana dashboard
 components/postgres/       optional CloudNativePG database component
 envs/sandbox/              example sandbox Kustomize overlay
+charts/kubit/               configurable Helm chart and example values
 tests/                     unit and regression tests
 ```
 
@@ -50,9 +51,27 @@ python3 -m json.tool base/monitoring/dashboard.json >/dev/null
 kubectl kustomize envs/sandbox >/dev/null
 ```
 
-The public manifest uses `kubit:1.2.2` as a placeholder image. Build or publish
-the application with your preferred container pipeline and override that image
-in your environment overlay before deployment.
+The public manifests and Helm chart use `kubit:1.3.0` as a placeholder image.
+Build or publish the application with your preferred container pipeline and
+override that image before deployment.
+
+## Helm installation
+
+The Helm chart is the recommended configurable installation path. It supports
+custom image, scheduling, storage, Ingress, application intervals, existing
+Secrets, Prometheus Operator resources, Grafana dashboard discovery, and an
+optional CloudNativePG cluster.
+
+```bash
+helm upgrade --install kubit ./charts/kubit \
+  --namespace kubit --create-namespace \
+  --set image.repository=ghcr.io/your-org/kubit \
+  --set config.clusterName=my-cluster
+```
+
+See [`charts/kubit/README.md`](charts/kubit/README.md) and the example values
+under [`charts/kubit/examples`](charts/kubit/examples). The existing Kustomize
+base remains available for consumers that prefer overlays.
 
 ## HTTP endpoints
 
