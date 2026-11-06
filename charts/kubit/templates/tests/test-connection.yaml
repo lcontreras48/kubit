@@ -8,9 +8,18 @@ metadata:
     "helm.sh/hook": test
 spec:
   restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   containers:
     - name: wget
       image: busybox:1.37
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
       command: ["wget"]
       args: ["{{ include "kubit.fullname" . }}:{{ .Values.service.port }}/healthz", "-qO-"]
 
