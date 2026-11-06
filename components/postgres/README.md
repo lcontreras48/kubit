@@ -33,8 +33,7 @@ components:
 
 The `Cluster` deliberately uses one instance and a 5 GiB volume. It uses the
 target cluster's default StorageClass unless an environment overlay selects a
-different one; sandbox selects `ceph-rbd`. It has no database high
-availability. CloudNativePG can manage recovery and lifecycle,
+different one. It has no database high availability. CloudNativePG can manage recovery and lifecycle,
 but backup, restore, and major-version upgrade procedures must still be defined
 before production use. Move directly to three instances if database HA becomes
 a requirement.

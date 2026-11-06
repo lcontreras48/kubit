@@ -32,35 +32,16 @@ spec:
           type: RuntimeDefault
       containers:
         - name: kubit
-          image: ghcr.io/lcontreras48/kubit:1.3.0
+          image: ghcr.io/lcontreras48/kubit:1.4.0
           imagePullPolicy: IfNotPresent
           env:
             - name: PYTHONDONTWRITEBYTECODE
               value: "1"
-            - name: SCAN_INTERVAL_SECONDS
-              value: "900"
-            - name: EVIDENCE_REFRESH_INTERVAL_SECONDS
-              value: "21600"
-            - name: EVIDENCE_STALE_AFTER_SECONDS
-              value: "604800"
-            - name: SOURCE_VALIDATION_TIMEOUT_SECONDS
-              value: "8"
-            - name: SOURCE_VALIDATION_MAX_BYTES
-              value: "1048576"
-            - name: SOURCE_VALIDATION_MAX_REDIRECTS
-              value: "5"
-            - name: SOURCE_VALIDATION_TICKET_TTL_SECONDS
-              value: "600"
-            - name: SOURCE_VALIDATION_MAX_CONCURRENT
-              value: "2"
-            - name: SOURCE_VALIDATION_ATTEMPTS_PER_MINUTE
-              value: "10"
-            - name: AUTH_LOGIN_ATTEMPTS_PER_MINUTE
-              value: "10"
-            - name: AUTH_GLOBAL_LOGIN_ATTEMPTS_PER_MINUTE
-              value: "60"
             - name: CACHE_DIR
               value: /var/cache/kubit
+          envFrom:
+            - configMapRef:
+                name: kubit-config
           ports:
             - name: http
               containerPort: 8080

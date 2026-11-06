@@ -20,8 +20,8 @@ Kubit requires Python 3.11 or newer. Run:
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 python3 scripts/set_version.py --check
-python3 -m json.tool base/monitoring/dashboard.json >/dev/null
-kubectl kustomize envs/sandbox >/dev/null
+python3 -m json.tool components/monitoring/dashboard.json >/dev/null
+kubectl kustomize base >/dev/null
 helm lint charts/kubit
 docker build -t kubit:dev .
 git diff --check

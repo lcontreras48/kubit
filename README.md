@@ -25,7 +25,7 @@ is never inferred as supported.
 
 ## Project status
 
-Kubit is currently a sandbox-stage project. The source version is `1.3.0`.
+Kubit is currently an early-stage project. The source version is `1.4.0`.
 Production use requires an explicit review of high availability, database
 recovery, provider coverage, resource sizing, and cluster security policy.
 
@@ -35,9 +35,8 @@ recovery, provider coverage, resource sizing, and cluster security policy.
 src/kubit/                 collector, compatibility engine, API, and web UI
 Dockerfile                  multi-stage non-root container image build
 base/                      reusable Kubernetes and monitoring resources
-base/monitoring/           ServiceMonitor, PrometheusRule, and Grafana dashboard
+components/monitoring/     optional Prometheus and Grafana resources
 components/postgres/       optional CloudNativePG database component
-envs/sandbox/              example sandbox Kustomize overlay
 charts/kubit/               configurable Helm chart and example values
 tests/                     unit and regression tests
 ```
@@ -48,13 +47,13 @@ Kubit requires Python 3.11 or newer.
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
-python3 -m json.tool base/monitoring/dashboard.json >/dev/null
-kubectl kustomize envs/sandbox >/dev/null
+python3 -m json.tool components/monitoring/dashboard.json >/dev/null
+kubectl kustomize base >/dev/null
 docker build -t kubit:dev .
 ```
 
 The public manifests and Helm chart use the release image
-`ghcr.io/lcontreras48/kubit:1.3.0`. Release tags build the application image,
+`ghcr.io/lcontreras48/kubit:1.4.0`. Release tags build the application image,
 publish immutable version tags to GHCR, package the Helm chart, and create the
 corresponding GitHub Release from this repository.
 
@@ -78,6 +77,18 @@ helm upgrade --install kubit ./charts/kubit \
 See [`charts/kubit/README.md`](charts/kubit/README.md) and the example values
 under [`charts/kubit/examples`](charts/kubit/examples). The existing Kustomize
 base remains available for consumers that prefer overlays.
+
+The raw Kustomize base installs directly into the `kubit` namespace without an
+environment-specific overlay:
+
+```bash
+kubectl apply -k base
+```
+
+Non-secret application defaults live in `base/configmap.yaml`. Kustomize users
+can patch that ConfigMap and the image from their own environment repository;
+no sandbox name or cluster-specific interval is embedded in this project. See
+[`base/README.md`](base/README.md) for a minimal remote overlay example.
 
 ## HTTP endpoints
 

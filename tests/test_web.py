@@ -25,22 +25,22 @@ class WebInterfaceTest(unittest.TestCase):
         )
         self.assertIsNotNone(version_match)
         version = version_match.group(1)
-        overlay = (root / "envs" / "sandbox" / "kustomization.yaml").read_text()
         self.assertRegex(version, r"^[0-9]+\.[0-9]+\.[0-9]+$")
-        self.assertIn(f"newTag: {version}", overlay)
-        self.assertNotIn("newTag: main", overlay)
         chart = (root / "charts" / "kubit" / "Chart.yaml").read_text()
         self.assertIn(f'appVersion: "{version}"', chart)
         values = (root / "charts" / "kubit" / "values.yaml").read_text()
         self.assertIn("repository: ghcr.io/lcontreras48/kubit", values)
         deployment = (root / "base" / "deployment.yaml").read_text()
         self.assertIn(f"image: ghcr.io/lcontreras48/kubit:{version}", deployment)
+        config = (root / "base" / "configmap.yaml").read_text()
+        self.assertIn("CLUSTER_NAME: cluster", config)
+        self.assertNotIn("sandbox", config.lower())
         workflow = (root / ".github" / "workflows" / "ci.yml").read_text()
         self.assertIn("python3 -m unittest discover -s tests -v", workflow)
 
     def test_grafana_dashboard_exposes_reasons_sources_and_filters(self):
         root = Path(__file__).parents[1]
-        dashboard_source = (root / "base" / "monitoring" / "dashboard.json").read_text()
+        dashboard_source = (root / "components" / "monitoring" / "dashboard.json").read_text()
         dashboard = json.loads(dashboard_source)
         self.assertEqual(
             dashboard_source,

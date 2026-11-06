@@ -23,7 +23,7 @@ def expected_fragments(version: str) -> dict[str, tuple[str, ...]]:
         "pyproject.toml": (f'version = "{version}"',),
         "charts/kubit/Chart.yaml": (f"version: {version}", f'appVersion: "{version}"'),
         "base/deployment.yaml": (f"image: ghcr.io/lcontreras48/kubit:{version}",),
-        "envs/sandbox/kustomization.yaml": (f"newTag: {version}",),
+        "base/README.md": (f"?ref=v{version}", f"newTag: {version}"),
         "README.md": (f"source version is `{version}`", f"ghcr.io/lcontreras48/kubit:{version}"),
     }
 
@@ -60,11 +60,8 @@ def update(current: str, target: str) -> None:
         f"image: ghcr.io/lcontreras48/kubit:{current}",
         f"image: ghcr.io/lcontreras48/kubit:{target}",
     )
-    replace_once(
-        "envs/sandbox/kustomization.yaml",
-        f"newTag: {current}",
-        f"newTag: {target}",
-    )
+    replace_once("base/README.md", f"?ref=v{current}", f"?ref=v{target}")
+    replace_once("base/README.md", f"newTag: {current}", f"newTag: {target}")
     replace_once(
         "README.md",
         f"source version is `{current}`",
