@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubit
+spec:
+  template:
+    spec:
+      containers:
+        - name: kubit
+          env:
+            - name: DATABASE_URL
+              value: postgresql://kubit@kubit-db-rw:5432/kubit
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kubit-db-app
+                  key: password
+            - name: KUBIT_BOOTSTRAP_ADMIN_USERNAME
+              value: admin
+            - name: KUBIT_BOOTSTRAP_ADMIN_PASSWORD_FILE
+              value: /var/run/secrets/kubit-db/bootstrap-admin-password
+            - name: AUTH_SESSION_HOURS
+              value: "12"
+            - name: AUTH_SECURE_COOKIES
+              value: "true"
+            - name: SCAN_HISTORY_RETENTION_DAYS
+              value: "30"
+          volumeMounts:
+            - name: database-credentials
+              mountPath: /var/run/secrets/kubit-db
+              readOnly: true
+      volumes:
+        - name: database-credentials
+          secret:
+            secretName: kubit-auth-bootstrap # pragma: allowlist secret -- Kubernetes Secret reference

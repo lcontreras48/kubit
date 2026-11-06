@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#091524">
+    <title>Kubit — Kubernetes Unified Baseline &amp; Interoperability Tracker</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="#overview" aria-label="Kubit overview">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3.5 18.5 7v7L12 17.5 5.5 14V7L12 3.5Z"/><path d="m8.5 9 3.5 2 3.5-2M12 11v4"/></svg>
+          </span>
+          <span class="brand-copy"><strong>Kubit</strong><small>Kubernetes Unified Baseline &amp; Interoperability Tracker</small></span>
+        </a>
+        <div class="topbar-actions">
+          <span id="live-badge" class="live-badge"><i></i><span>Connecting</span></span>
+          <button class="auth-button" type="button" id="auth-button" aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>
+            <span id="auth-label">Login</span>
+          </button>
+          <button class="logout-button" type="button" id="logout-button" title="End the current session" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg>
+            <span>Logout</span>
+          </button>
+          <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme" id="theme-toggle">
+            <svg class="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+            <span id="theme-label">Light</span>
+          </button>
+          <button class="icon-button" type="button" aria-label="Refresh data" id="refresh-button">
+            <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="cluster-picker" aria-label="Active cluster">
+        <span class="cluster-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="5" rx="1"/><rect x="4" y="14" width="16" height="5" rx="1"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>
+        </span>
+        <span class="cluster-copy"><strong>Active cluster</strong><small>Independent assessment</small></span>
+        <div class="select-like"><span id="cluster-name">Cluster</span><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></div>
+      </section>
+
+      <nav class="tabs" aria-label="Kubit sections">
+        <button class="tab active" type="button" data-view="overview">Overview</button>
+        <button class="tab" type="button" data-view="inventory">Inventory</button>
+        <button class="tab" type="button" data-view="security">Security</button>
+        <button class="tab" type="button" data-view="upgrade">Upgrade Lab</button>
+        <button class="tab" type="button" data-view="sources">Sources</button>
+        <button class="tab" type="button" data-view="admin" id="admin-tab" hidden>Administration</button>
+      </nav>
+
+      <section class="view active" id="overview-view">
+        <div class="section-heading">
+          <div><h1>Cluster Overview</h1><p>Evidence-based compatibility intelligence for your Kubernetes stack.</p></div>
+          <span class="data-badge" id="data-badge">Live data</span>
+        </div>
+
+        <article class="card overview-security-card">
+          <div class="overview-security-heading">
+            <div>
+              <span class="eyebrow">Security snapshot</span>
+              <strong>Current Trivy findings</strong>
+              <small id="overview-security-detail">Waiting for vulnerability reports</small>
+            </div>
+            <button type="button" class="overview-security-link" data-go="security">Open Security <span>→</span></button>
+          </div>
+          <div class="overview-security-stats">
+            <div class="overview-security-stat critical"><span>Critical</span><strong id="overview-security-critical">—</strong></div>
+            <div class="overview-security-stat high"><span>High</span><strong id="overview-security-high">—</strong></div>
+          </div>
+        </article>
+
+        <article class="card baseline-card">
+          <div class="baseline-heading">
+            <div><span class="eyebrow">Compatibility baseline</span><strong>What is deployed and being verified</strong></div>
+            <span class="status-pill unknown" id="baseline-status">Scanning</span>
+          </div>
+          <div class="baseline-grid">
+            <div class="baseline-item">
+              <span>Deployed Kubernetes</span>
+              <strong id="baseline-kubernetes">—</strong>
+              <small>Observed directly from the Kubernetes API</small>
+            </div>
+            <div class="baseline-item">
+              <span>Verification axis</span>
+              <strong id="baseline-axis">Kubernetes</strong>
+              <small>Platform components are checked against this deployed version</small>
+            </div>
+            <div class="baseline-item">
+              <span>Official evidence</span>
+              <strong id="baseline-providers">—</strong>
+              <small id="baseline-provider-detail">Waiting for evidence providers</small>
+            </div>
+          </div>
+        </article>
+
+        <div class="summary-grid">
+          <article class="card health-card">
+            <div class="card-label"><span>Compatibility health</span><span class="status-icon good">⌁</span></div>
+            <strong class="hero-number" id="health-percent">—</strong>
+            <div class="progress"><span id="health-progress"></span></div>
+            <small id="health-detail">Waiting for the first scan</small>
+          </article>
+          <button type="button" class="card attention-card summary-link" data-inventory-filter="attention">
+            <div class="card-label"><span>Attention required</span><span class="status-icon danger">!</span></div>
+            <strong class="hero-number" id="attention-count">—</strong>
+            <p class="danger-text" id="attention-label">Loading findings</p>
+            <small>Review before upgrade <b>→</b></small>
+          </button>
+          <button type="button" class="card compact-card summary-link" data-inventory-filter="supported">
+            <span>Supported</span><strong><i class="dot-icon supported">✓</i><span id="supported-count">—</span></strong>
+            <small>View filtered inventory →</small>
+          </button>
+          <button type="button" class="card compact-card summary-link" data-inventory-filter="unknown">
+            <span>Unverified</span><strong><i class="dot-icon unknown">?</i><span id="unknown-count">—</span></strong>
+            <small>Review missing evidence →</small>
+          </button>
+        </div>
+
+        <article class="card distribution-card">
+          <div class="card-title"><strong>Compatibility distribution</strong><span id="component-total">— components</span></div>
+          <div class="distribution" aria-label="Compatibility distribution">
+            <span class="bar-supported" id="bar-supported"></span><span class="bar-danger" id="bar-danger"></span><span class="bar-unknown" id="bar-unknown"></span>
+          </div>
+          <div class="legend">
+            <span><i class="legend-dot supported"></i>Supported · <b id="legend-supported">0</b></span>
+            <span><i class="legend-dot danger"></i>Attention · <b id="legend-danger">0</b></span>
+            <span><i class="legend-dot unknown"></i>Unverified · <b id="legend-unknown">0</b></span>
+          </div>
+        </article>
+
+        <article class="card relationships-card">
+          <div class="card-title">
+            <div><strong>Verified relationships</strong><small>Deployed version → version used for validation</small></div>
+            <span class="data-badge" id="relationship-total">0 relationships</span>
+          </div>
+          <div id="relationship-list" class="relationship-list"><p class="empty-state">Waiting for compatibility evidence…</p></div>
+        </article>
+
+        <article class="card findings-card">
+          <div class="card-title"><strong>Critical findings</strong><span class="finding-badge" id="finding-badge">0 findings</span></div>
+          <div id="findings-list" class="findings-list"><p class="empty-state">Waiting for compatibility results…</p></div>
+        </article>
+
+        <button type="button" class="primary-action" data-go="inventory">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M5 11h14M6 15h12M8 19h8"/></svg>
+          Explore component inventory
+          <span>→</span>
+        </button>
+      </section>
+
+      <section class="view" id="inventory-view">
+        <div class="section-heading">
+          <div><h1>Component Inventory</h1><p>Versions observed directly from the sandbox cluster.</p></div>
+          <span class="data-badge" id="inventory-total">0 instances</span>
+        </div>
+        <div class="toolbar">
+          <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="inventory-search" type="search" placeholder="Filter components, versions or namespaces"></label>
+          <select id="inventory-status" aria-label="Filter inventory by status">
+            <option value="all">All states</option>
+            <option value="supported">Supported</option>
+            <option value="attention">Attention</option>
+            <option value="unknown">Unverified</option>
+          </select>
+        </div>
+        <div class="inventory-legend" aria-label="Inventory status colors">
+          <span><i class="legend-dot grouping"></i>Blue frame: application group · green header: Healthy + Synced · child colors: compatibility</span>
+          <span><i class="legend-dot danger"></i>Attention: incompatible or unsupported</span>
+          <span><i class="legend-dot unknown"></i>Unverified: unknown or stale evidence</span>
+          <span><i class="legend-dot supported"></i>Supported</span>
+        </div>
+        <div class="source-override-note"><strong>Source association:</strong> choose an available source per row or keep <em>Automatic</em>. Overrides are stored only in this browser and never change Kubit's compatibility decision.</div>
+        <div class="card table-card">
+          <div class="table-scroll">
+            <table class="inventory-table">
+              <thead><tr><th>Application</th><th>Component</th><th>Deployed version</th><th>Runtime</th><th>Source of truth</th><th>Namespace</th><th>Verified against</th><th>Why</th><th>Node / instance</th><th>Status</th></tr></thead>
+              <tbody id="inventory-body"><tr><td colspan="10" class="empty-state">Waiting for inventory…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="pagination" aria-label="Inventory pagination">
+            <label for="inventory-page-size">Items per page</label>
+            <select id="inventory-page-size"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+            <span class="pagination-info" id="inventory-page-info" aria-live="polite">0 items</span>
+            <div class="pagination-actions"><button type="button" id="inventory-page-prev">Previous</button><button type="button" id="inventory-page-next">Next</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="security-view">
+        <div class="section-heading">
+          <div><h1>Security</h1><p>Read-only vulnerability, configuration, secret and SBOM evidence from Trivy Operator.</p></div>
+          <span class="status-pill unknown" id="security-state">Unknown</span>
+        </div>
+        <div class="source-override-note security-policy"><strong>Independent axis:</strong> security findings never alter compatibility results. Missing or stale reports remain unknown; they are never treated as a clean scan.</div>
+        <div class="security-summary">
+          <article class="card security-stat critical"><span>Critical CVEs</span><button type="button" class="security-stat-filter" data-security-severity="critical" aria-pressed="false" aria-label="Filter list to Critical CVEs"><strong id="security-critical">—</strong></button></article>
+          <article class="card security-stat high"><span>High CVEs</span><button type="button" class="security-stat-filter" data-security-severity="high" aria-pressed="false" aria-label="Filter list to High CVEs"><strong id="security-high">—</strong></button></article>
+          <article class="card security-stat"><span>Fixable CVEs</span><strong id="security-fixable">—</strong></article>
+          <article class="card security-stat"><span>Container coverage</span><strong id="security-coverage">Unknown</strong><small id="security-coverage-detail">Waiting for reports</small></article>
+        </div>
+        <div class="toolbar">
+          <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="security-search" type="search" placeholder="Filter workloads, components, images or CVEs"></label>
+          <select id="security-type" aria-label="Filter security report type">
+            <option value="all">All report types</option>
+            <option value="vulnerability">Vulnerabilities</option>
+            <option value="config_audit">Configuration</option>
+            <option value="exposed_secret">Exposed secrets</option>
+            <option value="sbom">SBOM</option>
+          </select>
+        </div>
+        <div class="security-active-filter" id="security-active-filter" aria-live="polite" hidden>
+          <span class="security-filter-caption">Applied filter</span>
+          <button type="button" id="security-active-filter-clear" aria-label="Clear active severity filter"><span id="security-active-filter-label">Severity</span><b aria-hidden="true">×</b></button>
+          <small id="security-active-filter-detail"></small>
+        </div>
+        <div class="card table-card">
+          <div class="table-scroll">
+            <table class="security-table">
+              <thead><tr><th>Workload / component</th><th>Report</th><th>Image</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Additional evidence</th><th><span class="observed-heading">Observed <span class="observed-help" tabindex="0" aria-label="Observed status definitions">?<span class="observed-tooltip" role="tooltip"><strong>Fresh</strong><span>Generated within the configured freshness window.</span><strong>Stale</strong><span>Older than the allowed window; findings may no longer describe the running workload.</span><strong>Unknown</strong><span>Age or collection state cannot be verified. This never means the report is clean.</span></span></span></span></th></tr></thead>
+              <tbody id="security-body"><tr><td colspan="9" class="empty-state">Waiting for Trivy reports…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="pagination" aria-label="Security pagination">
+            <label for="security-page-size">Items per page</label>
+            <select id="security-page-size"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+            <span class="pagination-info" id="security-page-info" aria-live="polite">0 items</span>
+            <div class="pagination-actions"><button type="button" id="security-page-prev">Previous</button><button type="button" id="security-page-next">Next</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="upgrade-view">
+        <div class="section-heading">
+          <div><h1>Upgrade Lab</h1><p>Test a Kubernetes target version without changing the cluster.</p></div>
+          <span class="data-badge">Read-only simulation</span>
+        </div>
+        <article class="card upgrade-form-card">
+          <label for="target-version">Target Kubernetes version</label>
+          <div class="upgrade-form">
+            <input id="target-version" inputmode="decimal" placeholder="v1.38.0" aria-describedby="current-kubernetes-version">
+            <button id="analyze-upgrade" type="button">Analyze upgrade <span>→</span></button>
+          </div>
+          <small id="current-kubernetes-version">All installed component versions remain unchanged in the simulation.</small>
+        </article>
+        <div id="upgrade-results" class="upgrade-results">
+          <article class="card empty-upgrade"><strong>Ready when you are</strong><p>Enter a target version to evaluate Kubernetes internals and application support matrices.</p></article>
+        </div>
+      </section>
+
+      <section class="view" id="sources-view">
+        <div class="section-heading">
+          <div><h1>Sources of Truth</h1><p>Upstream evidence used by the current compatibility assessment.</p></div>
+          <span class="data-badge" id="sources-total">0 sources</span>
+        </div>
+        <article class="card source-policy-card">
+          <span class="eyebrow">Evidence policy</span>
+          <strong>Trace every decision back to its upstream source</strong>
+          <p>Unavailable or stale evidence never produces a supported result. Sources shown here are discovered from the active providers, not maintained as a manual inventory.</p>
+        </article>
+        <article class="card privileged-card" id="source-proposal-card" hidden>
+          <div class="card-title"><div><strong>Propose a Source of Truth</strong><small>Operator access · verify eligibility before sending work to an administrator</small></div></div>
+          <form id="source-proposal-form" class="privileged-form">
+            <label>Discovered component<select name="component" id="source-component" required disabled><option value="">Waiting for inventory…</option></select></label>
+            <label>Official HTTPS source<input name="source_url" type="url" required placeholder="https://project.example/support-matrix"></label>
+            <label class="form-wide">Notes<textarea name="notes" maxlength="2000" rows="3" placeholder="Why this source is authoritative"></textarea></label>
+            <div class="source-validation form-wide" id="source-validation" hidden aria-live="polite"></div>
+            <div class="source-actions form-wide">
+              <button type="button" class="verify-source" id="verify-source">Verify URL</button>
+              <button type="submit" id="submit-source" disabled>Submit eligible candidate</button>
+            </div>
+          </form>
+        </article>
+        <div id="sources-list" class="sources-list"><article class="card empty-upgrade"><strong>Waiting for evidence</strong><p>Sources will appear after the first provider refresh.</p></article></div>
+      </section>
+
+      <section class="view" id="admin-view">
+        <div class="section-heading">
+          <div><h1>User Administration</h1><p>Create local accounts and assign Kubit's built-in access roles.</p></div>
+          <span class="data-badge">Administrator only</span>
+        </div>
+        <article class="card account-summary-card">
+          <div>
+            <span class="eyebrow">Current session</span>
+            <strong id="admin-current-user">Administrator</strong>
+            <small>Passwords are stored as memory-hard hashes. Existing reports remain public and read-only.</small>
+          </div>
+          <button type="button" class="secondary-action" id="admin-logout-button">Logout</button>
+        </article>
+        <article class="card privileged-card" id="user-admin-card">
+          <div class="card-title"><div><strong>Create local user</strong><small>Choose the minimum role required for this account.</small></div></div>
+          <form id="user-admin-form" class="privileged-form user-form">
+            <label>Username<input name="username" required minlength="3" maxlength="64" autocomplete="off"></label>
+            <label>Temporary password<input name="password" type="password" required minlength="12" autocomplete="new-password"></label>
+            <label>Role<select name="role"><option value="viewer">Viewer — read only</option><option value="operator">Operator — propose sources</option><option value="admin">Admin — manage users</option></select></label>
+            <button type="submit">Create user</button>
+          </form>
+        </article>
+        <article class="card user-directory-card">
+          <div class="card-title">
+            <div><strong>Local users</strong><small>Accounts stored in this cluster's PostgreSQL database.</small></div>
+            <button type="button" class="secondary-action" id="users-refresh">Refresh</button>
+          </div>
+          <div class="user-list" id="user-list"><p class="empty-state">Loading users…</p></div>
+        </article>
+      </section>
+
+      <footer>
+        <span><svg viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.5-2.6 7.6-7 10-4.4-2.4-7-5.5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Kubit · Unified baseline &amp; interoperability</span>
+        <span id="footer-version">Version loading…</span>
+      </footer>
+    </main>
+    <dialog class="auth-dialog" id="auth-dialog" aria-labelledby="auth-dialog-title">
+      <form id="login-form" class="auth-form">
+        <div class="auth-dialog-heading">
+          <div><span class="eyebrow">Privileged access</span><h2 id="auth-dialog-title">Login to Kubit</h2></div>
+          <button type="button" class="dialog-close" id="auth-dialog-close" aria-label="Close login">×</button>
+        </div>
+        <p>The cluster overview remains public. Login is required only to propose or administer changes.</p>
+        <label>Username<input name="username" required autocomplete="username"></label>
+        <label>Password<input name="password" type="password" required autocomplete="current-password"></label>
+        <button type="submit" class="login-submit">Login</button>
+        <p class="form-error" id="login-error" role="alert"></p>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

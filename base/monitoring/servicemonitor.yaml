@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kubit
+  labels:
+    app.kubernetes.io/name: kubit
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kubit
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 5m
+      scrapeTimeout: 30s

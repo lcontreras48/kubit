@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubit
+  labels:
+    app.kubernetes.io/name: kubit
+    app.kubernetes.io/part-of: kubit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kubit
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kubit
+        app.kubernetes.io/part-of: kubit
+    spec:
+      serviceAccountName: kubit
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: kubit
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: kubit
+          image: kubit:1.2.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: SCAN_INTERVAL_SECONDS
+              value: "900"
+            - name: EVIDENCE_REFRESH_INTERVAL_SECONDS
+              value: "21600"
+            - name: EVIDENCE_STALE_AFTER_SECONDS
+              value: "604800"
+            - name: SOURCE_VALIDATION_TIMEOUT_SECONDS
+              value: "8"
+            - name: SOURCE_VALIDATION_MAX_BYTES
+              value: "1048576"
+            - name: SOURCE_VALIDATION_MAX_REDIRECTS
+              value: "5"
+            - name: SOURCE_VALIDATION_TICKET_TTL_SECONDS
+              value: "600"
+            - name: SOURCE_VALIDATION_MAX_CONCURRENT
+              value: "2"
+            - name: SOURCE_VALIDATION_ATTEMPTS_PER_MINUTE
+              value: "10"
+            - name: AUTH_LOGIN_ATTEMPTS_PER_MINUTE
+              value: "10"
+            - name: AUTH_GLOBAL_LOGIN_ATTEMPTS_PER_MINUTE
+              value: "60"
+            - name: CACHE_DIR
+              value: /var/cache/kubit
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 20m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: evidence-cache
+              mountPath: /var/cache/kubit
+      volumes:
+        - name: evidence-cache
+          persistentVolumeClaim:
+            claimName: kubit-evidence-cache

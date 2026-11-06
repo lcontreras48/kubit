@@ -1,0 +1,24 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: kubit-db
+  labels:
+    app.kubernetes.io/name: kubit-db
+    app.kubernetes.io/part-of: kubit
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: kubit
+      owner: kubit
+      secret:
+        name: kubit-db-app
+  storage:
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 25m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

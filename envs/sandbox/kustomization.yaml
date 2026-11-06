@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubit
+
+resources:
+  - ../../base
+
+images:
+  - name: kubit
+    newTag: 1.2.2
+
+patches:
+  - target:
+      kind: Deployment
+      name: kubit
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: kubit
+      spec:
+        template:
+          spec:
+            containers:
+              - name: kubit
+                env:
+                  - name: SCAN_INTERVAL_SECONDS
+                    value: "300"
+                  - name: CLUSTER_NAME
+                    value: sandbox

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Release notes from talos</title>
+  <entry>
+    <title>v1.14.1</title>
+    <content type="html">registry.k8s.io/kube-apiserver:v1.37.0 ghcr.io/siderolabs/kubelet:v1.37.0 registry.k8s.io/coredns/coredns:v1.14.7 ghcr.io/siderolabs/flannel:0.28.9</content>
+  </entry>
+  <entry>
+    <title>v1.14.0</title>
+    <content type="html">registry.k8s.io/kube-apiserver:v1.37.0 registry.k8s.io/coredns/coredns:v1.14.6 ghcr.io/siderolabs/flannel:v0.28.8</content>
+  </entry>
+  <entry>
+    <title>v1.13.9</title>
+    <content type="html">ghcr.io/siderolabs/kubelet:v1.36.3</content>
+  </entry>
+  <entry>
+    <title>v1.15.0-alpha.0</title>
+    <content type="html">registry.k8s.io/kube-apiserver:v1.38.0</content>
+  </entry>
+</feed>

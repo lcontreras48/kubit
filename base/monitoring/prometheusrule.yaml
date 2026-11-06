@@ -1,0 +1,51 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubit
+  labels:
+    app.kubernetes.io/name: kubit
+    release: prometheus
+spec:
+  groups:
+    - name: kubit.compatibility
+      rules:
+        - alert: KubitCompatibilityScanFailed
+          expr: kubit_last_scan_success == 0
+          for: 20m
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubit cannot evaluate cluster compatibility
+            description: The Kubit scan has failed for at least 20 minutes.
+        - alert: KubitCompatibilityScanStale
+          expr: absent(kubit_last_scan_timestamp_seconds) or (time() - kubit_last_scan_timestamp_seconds > 1800)
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubit compatibility data is stale
+            description: No Kubit scan has completed in the last 30 minutes.
+        - alert: KubitIncompatibleComponent
+          expr: kubit_compatibility_results{status="incompatible"} > 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: An incompatible cluster component was detected
+            description: Kubit found at least one compatibility rule violation.
+        - alert: KubitUnsupportedComponent
+          expr: kubit_compatibility_results{status="unsupported"} > 0
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: An unsupported cluster component was detected
+            description: Kubit found a component outside its official support window or matrix.
+        - alert: KubitEvidenceProviderDegraded
+          expr: kubit_evidence_provider_info{status=~"stale|unavailable"} == 1
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubit compatibility evidence is degraded
+            description: An automatic evidence provider is stale or unavailable; Kubit will not claim supported compatibility from stale data.
