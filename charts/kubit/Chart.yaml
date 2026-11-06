@@ -2,8 +2,8 @@ apiVersion: v2
 name: kubit
 description: Evidence-based Kubernetes compatibility monitor
 type: application
-version: 1.4.2
-appVersion: "1.4.2"
+version: 1.4.3
+appVersion: "1.4.3"
 kubeVersion: ">=1.25.0-0"
 home: https://github.com/lcontreras48/kubit
 sources:

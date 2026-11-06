@@ -19,11 +19,11 @@ kind: Kustomization
 namespace: kubit
 
 resources:
-  - github.com/lcontreras48/kubit//base?ref=v1.4.2
+  - github.com/lcontreras48/kubit//base?ref=v1.4.3
 
 images:
   - name: ghcr.io/lcontreras48/kubit
-    newTag: 1.4.2
+    newTag: 1.4.3
 
 patches:
   - target:
