@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: kubit
+  repository: ghcr.io/lcontreras48/kubit
   pullPolicy: IfNotPresent
   tag: ""
 

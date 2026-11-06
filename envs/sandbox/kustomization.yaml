@@ -7,7 +7,7 @@ resources:
   - ../../base
 
 images:
-  - name: kubit
+  - name: ghcr.io/lcontreras48/kubit
     newTag: 1.3.0
 
 patches:

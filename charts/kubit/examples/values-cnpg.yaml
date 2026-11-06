@@ -1,6 +1,3 @@
-image:
-  repository: ghcr.io/your-org/kubit
-
 config:
   clusterName: production
 

@@ -33,6 +33,7 @@ recovery, provider coverage, resource sizing, and cluster security policy.
 
 ```text
 src/kubit/                 collector, compatibility engine, API, and web UI
+Dockerfile                  multi-stage non-root container image build
 base/                      reusable Kubernetes and monitoring resources
 base/monitoring/           ServiceMonitor, PrometheusRule, and Grafana dashboard
 components/postgres/       optional CloudNativePG database component
@@ -49,11 +50,17 @@ Kubit requires Python 3.11 or newer.
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 python3 -m json.tool base/monitoring/dashboard.json >/dev/null
 kubectl kustomize envs/sandbox >/dev/null
+docker build -t kubit:dev .
 ```
 
-The public manifests and Helm chart use `kubit:1.3.0` as a placeholder image.
-Build or publish the application with your preferred container pipeline and
-override that image before deployment.
+The public manifests and Helm chart use the release image
+`ghcr.io/lcontreras48/kubit:1.3.0`. Release tags build the application image,
+publish immutable version tags to GHCR, package the Helm chart, and create the
+corresponding GitHub Release from this repository.
+
+Container build, registry publishing, required GitHub settings, and migration
+from the former `ics-docker/kubit` project are documented in
+[`docs/container-image.md`](docs/container-image.md).
 
 ## Helm installation
 
@@ -65,7 +72,6 @@ optional CloudNativePG cluster.
 ```bash
 helm upgrade --install kubit ./charts/kubit \
   --namespace kubit --create-namespace \
-  --set image.repository=ghcr.io/your-org/kubit \
   --set config.clusterName=my-cluster
 ```
 

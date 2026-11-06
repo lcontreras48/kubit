@@ -22,6 +22,8 @@ jobs:
         env:
           PYTHONPATH: src
         run: python3 -m unittest discover -s tests -v
+      - name: Verify release versions
+        run: python3 scripts/set_version.py --check
       - name: Validate Grafana dashboard JSON
         run: python3 -m json.tool base/monitoring/dashboard.json >/dev/null
       - name: Set up Helm
@@ -40,3 +42,12 @@ jobs:
             --set postgresql.existingAppSecret=kubit-db-app \
             --set database.bootstrapAdmin.existingSecret=kubit-bootstrap-admin \
             >/dev/null
+      - name: Build container image
+        run: |
+          version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' pyproject.toml)"
+          docker build \
+            --build-arg "KUBIT_COMMIT=${GITHUB_SHA}" \
+            --build-arg "KUBIT_VERSION=${version}" \
+            --tag kubit:test .
+          docker run --rm --entrypoint python kubit:test -c \
+            'from importlib.metadata import version; assert version("kubit") == "'"${version}"'"'

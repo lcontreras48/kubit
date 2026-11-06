@@ -31,6 +31,10 @@ class WebInterfaceTest(unittest.TestCase):
         self.assertNotIn("newTag: main", overlay)
         chart = (root / "charts" / "kubit" / "Chart.yaml").read_text()
         self.assertIn(f'appVersion: "{version}"', chart)
+        values = (root / "charts" / "kubit" / "values.yaml").read_text()
+        self.assertIn("repository: ghcr.io/lcontreras48/kubit", values)
+        deployment = (root / "base" / "deployment.yaml").read_text()
+        self.assertIn(f"image: ghcr.io/lcontreras48/kubit:{version}", deployment)
         workflow = (root / ".github" / "workflows" / "ci.yml").read_text()
         self.assertIn("python3 -m unittest discover -s tests -v", workflow)
 

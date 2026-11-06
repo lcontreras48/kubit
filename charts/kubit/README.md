@@ -7,13 +7,11 @@ opt-in so the chart does not assume which operators exist in the cluster.
 
 ## Install
 
-Override the placeholder image repository with an image available to the
-cluster:
+The chart defaults to the matching release image published by this repository:
 
 ```bash
 helm upgrade --install kubit ./charts/kubit \
   --namespace kubit --create-namespace \
-  --set image.repository=ghcr.io/your-org/kubit \
   --set config.clusterName=my-cluster
 ```
 
@@ -21,7 +19,7 @@ Inspect all generated resources before applying them:
 
 ```bash
 helm template kubit ./charts/kubit --namespace kubit \
-  --set image.repository=ghcr.io/your-org/kubit
+  --set config.clusterName=my-cluster
 ```
 
 ## Common configurations
