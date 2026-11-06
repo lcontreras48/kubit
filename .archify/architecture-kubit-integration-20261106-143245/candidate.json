@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitectura e integraciones de Kubit",
+    "subtitle": "Inventario, evidencia, seguridad, observabilidad y persistencia",
+    "locale": "es",
+    "translations": {
+      "page.title": "{title} · Diagrama",
+      "diagram.description.architecture": "Diagrama de arquitectura de Kubit.",
+      "legend.title": "Leyenda",
+      "legend.architecture.frontend": "Interfaz",
+      "legend.architecture.backend": "Aplicación",
+      "legend.architecture.database": "Persistencia",
+      "legend.architecture.cloud": "Plataforma",
+      "legend.architecture.security": "Seguridad",
+      "legend.architecture.external": "Externo",
+      "viewer.theme.toggle": "Cambiar tema",
+      "viewer.export.button": "Exportar",
+      "viewer.guide.open": "Explorar diagrama"
+    },
+    "output": ".archify/architecture-kubit-integration-20261106-143245/kubit-integration.html",
+    "quality_profile": "showcase",
+    "engineering_profile": "deployment-ownership",
+    "repository": {
+      "url": "git@github.com:lcontreras48/kubit.git",
+      "revision": "8bb6785f676c7cf2d1c9332e6895f42c211ae2e4",
+      "link_mode": "local-only"
+    },
+    "views": [
+      {
+        "id": "inventario",
+        "label": "Inventario y compatibilidad",
+        "focus": ["kubernetes_api", "kubit", "upstream", "evidence_cache", "web_service"],
+        "note": "La API aporta inventario; las fuentes oficiales aportan reglas verificables."
+      },
+      {
+        "id": "seguridad",
+        "label": "Seguridad Trivy",
+        "focus": ["trivy_reports", "kubernetes_api", "rbac", "kubit"],
+        "note": "Kubit solo lista reportes CRD; no ejecuta escaneos ni modifica recursos."
+      },
+      {
+        "id": "observabilidad",
+        "label": "Prometheus y Grafana",
+        "focus": ["web_service", "prometheus", "grafana", "dashboard_config"],
+        "note": "Prometheus extrae /metrics y Grafana consulta Prometheus."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "argocd_apps",
+      "type": "backend",
+      "label": "Argo CD Applications",
+      "sublabel": "CRs opcionales",
+      "pos": [44, 92],
+      "size": [158, 64],
+      "tag": "opcional",
+      "sources": [
+        {"path": "src/kubit/collector.py", "line": 101, "end_line": 119, "label": "lector configurable"},
+        {"path": "charts/kubit/values.yaml", "line": 76, "end_line": 84, "label": "valor Helm"}
+      ]
+    },
+    {
+      "id": "kubernetes_api",
+      "type": "cloud",
+      "label": "Kubernetes API",
+      "tag": "platform team",
+      "sublabel": "inventario + CRs",
+      "pos": [210, 246],
+      "size": [160, 66],
+      "sources": [
+        {"path": "src/kubit/collector.py", "line": 105, "end_line": 140, "label": "endpoints leídos"}
+      ]
+    },
+    {
+      "id": "trivy_reports",
+      "type": "security",
+      "label": "Trivy Operator reports",
+      "sublabel": "CVEs · audits · secrets · SBOM",
+      "pos": [44, 430],
+      "size": [170, 70],
+      "tag": "opcional",
+      "sources": [
+        {"path": "src/kubit/security.py", "line": 9, "end_line": 58, "label": "CRDs y lectura"},
+        {"path": "charts/kubit/values.yaml", "line": 76, "end_line": 84, "label": "valor Helm"}
+      ]
+    },
+    {
+      "id": "rbac",
+      "type": "security",
+      "label": "ServiceAccount + RBAC",
+      "tag": "Kubit maintainers",
+      "sublabel": "get /version · list-only",
+      "pos": [280, 430],
+      "size": [166, 68],
+      "sources": [
+        {"path": "base/rbac.yaml", "line": 1, "end_line": 42, "label": "permisos exactos"}
+      ]
+    },
+    {
+      "id": "upstream",
+      "type": "external",
+      "label": "Fuentes upstream oficiales",
+      "sublabel": "HTTPS · matrices · releases",
+      "pos": [516, 48],
+      "size": [184, 68],
+      "sources": [
+        {"path": "src/kubit/providers.py", "line": 1313, "end_line": 1351, "label": "fetch y fallback"},
+        {"path": "src/kubit/providers.py", "line": 1373, "end_line": 1399, "label": "proveedores registrados"}
+      ]
+    },
+    {
+      "id": "kubit",
+      "type": "backend",
+      "label": "Kubit Pod",
+      "sublabel": "collector · engine · API · UI",
+      "pos": [520, 246],
+      "size": [174, 72],
+      "tag": "UID 65532",
+      "sources": [
+        {"path": "src/kubit/app.py", "line": 85, "end_line": 124, "label": "ciclo de escaneo"},
+        {"path": "src/kubit/app.py", "line": 40, "end_line": 69, "label": "estado y métricas"}
+      ]
+    },
+    {
+      "id": "evidence_cache",
+      "type": "database",
+      "label": "Evidence cache PVC",
+      "tag": "Kubit maintainers",
+      "sublabel": "snapshots + checksum",
+      "pos": [500, 500],
+      "size": [166, 64],
+      "sources": [
+        {"path": "src/kubit/providers.py", "line": 1336, "end_line": 1351, "label": "cache fresh/stale"},
+        {"path": "charts/kubit/values.yaml", "line": 90, "end_line": 97, "label": "persistencia"}
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL / CloudNativePG",
+      "sublabel": "usuarios · sesiones · historial",
+      "pos": [720, 500],
+      "size": [190, 64],
+      "tag": "opcional",
+      "sources": [
+        {"path": "src/kubit/database.py", "line": 81, "end_line": 104, "label": "conexión y esquema"},
+        {"path": "charts/kubit/values.yaml", "line": 140, "end_line": 145, "label": "configuración"}
+      ]
+    },
+    {
+      "id": "web_service",
+      "type": "frontend",
+      "label": "Kubit Service",
+      "tag": "Kubit maintainers",
+      "sublabel": "UI · JSON API · /metrics",
+      "pos": [760, 246],
+      "size": [166, 68],
+      "sources": [
+        {"path": "src/kubit/metrics.py", "line": 14, "end_line": 99, "label": "métricas exportadas"},
+        {"path": "charts/kubit/templates/servicemonitor.yaml", "line": 11, "end_line": 19, "label": "scrape /metrics"}
+      ]
+    },
+    {
+      "id": "prometheus",
+      "type": "external",
+      "label": "Prometheus",
+      "sublabel": "scraper de /metrics",
+      "pos": [760, 70],
+      "size": [154, 62],
+      "tag": "opcional",
+      "sources": [
+        {"path": "charts/kubit/templates/servicemonitor.yaml", "line": 1, "end_line": 20, "label": "ServiceMonitor"},
+        {"path": "charts/kubit/values.yaml", "line": 120, "end_line": 125, "label": "configuración"}
+      ]
+    },
+    {
+      "id": "grafana",
+      "type": "frontend",
+      "label": "Grafana",
+      "sublabel": "dashboard de compatibilidad",
+      "pos": [1020, 70],
+      "size": [174, 64],
+      "tag": "opcional",
+      "sources": [
+        {"path": "charts/kubit/templates/grafana-dashboard.yaml", "line": 1, "end_line": 18, "label": "dashboard ConfigMap"}
+      ]
+    },
+    {
+      "id": "dashboard_config",
+      "type": "cloud",
+      "label": "Dashboard ConfigMap",
+      "tag": "Kubit maintainers",
+      "sublabel": "descubierto por sidecar",
+      "pos": [1010, 470],
+      "size": [180, 64],
+      "sources": [
+        {"path": "components/monitoring/kustomization.yaml", "line": 1, "end_line": 15, "label": "componente opcional"},
+        {"path": "charts/kubit/templates/grafana-dashboard.yaml", "line": 1, "end_line": 18, "label": "template Helm"}
+      ]
+    },
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "Usuario / operador",
+      "sublabel": "navegador y API client",
+      "pos": [1020, 246],
+      "size": [166, 64],
+      "sources": [
+        {"path": "src/kubit/app.py", "line": 25, "end_line": 30, "label": "assets web"},
+        {"path": "src/kubit/metrics.py", "line": 29, "end_line": 36, "label": "inventario expuesto"}
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Cluster Kubernetes",
+      "wraps": ["argocd_apps", "kubernetes_api", "trivy_reports", "rbac", "kubit", "evidence_cache", "postgres", "web_service", "prometheus", "grafana", "dashboard_config"],
+      "pad": 24
+    },
+    {
+      "kind": "security-group",
+      "label": "namespace kubit · identidad read-only",
+      "wraps": ["rbac", "kubit", "evidence_cache", "postgres", "web_service", "dashboard_config"],
+      "pad": 15
+    }
+  ],
+  "connections": [
+    {"from": "argocd_apps", "to": "kubernetes_api", "label": "Application CRs", "variant": "dashed"},
+    {"from": "trivy_reports", "to": "kubernetes_api", "label": "report CRs", "variant": "security"},
+    {"from": "rbac", "to": "kubit", "label": "ServiceAccount binding", "variant": "security"},
+    {"from": "kubernetes_api", "to": "kubit", "label": "HTTPS list · inventario", "variant": "emphasis"},
+    {"from": "upstream", "to": "kubit", "label": "evidencia HTTPS", "variant": "dashed"},
+    {"from": "kubit", "to": "evidence_cache", "label": "snapshots + checksum"},
+    {"from": "kubit", "to": "postgres", "label": "auth + historial", "variant": "dashed"},
+    {"from": "kubit", "to": "web_service", "label": "HTTP :8080", "variant": "emphasis"},
+    {"from": "operator", "to": "web_service", "label": "UI + JSON API", "variant": "emphasis"},
+    {"from": "prometheus", "to": "web_service", "label": "GET /metrics", "variant": "dashed"},
+    {"from": "grafana", "to": "prometheus", "label": "PromQL"},
+    {"from": "dashboard_config", "to": "grafana", "label": "sidecar discovery", "variant": "dashed"},
+    {"from": "operator", "to": "grafana", "label": "consulta dashboards", "variant": "dashed"}
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Información base",
+      "items": [
+        "Kubernetes API + ClusterRole list-only producen inventario y versiones",
+        "Las fuentes upstream aportan matrices; stale o unknown nunca se vuelven supported",
+        "El cache conserva evidencia y checksum cuando una fuente temporalmente falla"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Integraciones opcionales",
+      "items": [
+        "Argo CD agrega propiedad, sync y health de Applications",
+        "Trivy Operator debe crear los report CRs; Kubit solamente los lee",
+        "PostgreSQL habilita autenticación, propuestas, auditoría e historial"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Observabilidad",
+      "items": [
+        "Prometheus extrae /metrics: Kubit nunca consulta Prometheus",
+        "Grafana consulta Prometheus y descubre el dashboard ConfigMap",
+        "ServiceMonitor, PrometheusRule y dashboard son recursos opt-in"
+      ]
+    }
+  ]
+}

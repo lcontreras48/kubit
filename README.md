@@ -39,6 +39,8 @@ ClusterRole. Additional views appear when their producers are installed:
 
 See [`docs/integrations.md`](docs/integrations.md) for official repositories,
 installation examples, configuration switches, exact RBAC, and data direction.
+The [interactive integration architecture](.archify/architecture-kubit-integration-20261106-143245/kubit-integration.html)
+shows the same relationships, ownership boundaries, and optional data paths.
 
 ## Project status
 
@@ -51,7 +53,7 @@ recovery, provider coverage, resource sizing, and cluster security policy.
 ```text
 src/kubit/                 collector, compatibility engine, API, and web UI
 Dockerfile                  multi-stage non-root container image build
-base/                      reusable Kubernetes and monitoring resources
+base/                      neutral reusable Kubernetes resources
 components/monitoring/     optional Prometheus and Grafana resources
 components/postgres/       optional CloudNativePG database component
 charts/kubit/               configurable Helm chart and example values

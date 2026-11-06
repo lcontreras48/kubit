@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "ac7d7818-c326-4bf7-ab74-065a28b66047",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/work/.archify/architecture-kubit-integration-20261106-143245/candidate.json",
+  "output": "/work/.archify/architecture-kubit-integration-20261106-143245/kubit-integration.html",
+  "specification": {
+    "sha256": "32e3d9a2c479c06e76349e5d0a76486f0ad5c9de02d83223a68dbc4822ffce96",
+    "bytes": 10401
+  },
+  "artifact": {
+    "sha256": "6c643377690115dc2b95eb5072aafff6a130ce3e748505c4395b40acb58329db",
+    "bytes": 778554
+  }
+}
