@@ -1,5 +1,10 @@
 replicaCount: 1
 
+# Recreate avoids multi-attach failures with the default ReadWriteOnce cache.
+# RollingUpdate is suitable when persistence is disabled or the volume supports
+# simultaneous mounts from all replicas.
+deploymentStrategy: Recreate
+
 image:
   repository: ghcr.io/lcontreras48/kubit
   pullPolicy: IfNotPresent

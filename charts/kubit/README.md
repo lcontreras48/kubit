@@ -92,5 +92,8 @@ an install.
 
 The default cache volume is `ReadWriteOnce`, so keep `replicaCount: 1` unless
 you disable persistence or supply a storage class/access mode that supports all
-replicas.
+replicas. The chart therefore defaults to `deploymentStrategy: Recreate` to
+avoid multi-attach deadlocks during upgrades. Set it to `RollingUpdate` only
+when the storage configuration permits the old and new Pods to mount at the
+same time.
 

@@ -44,7 +44,7 @@ shows the same relationships, ownership boundaries, and optional data paths.
 
 ## Project status
 
-Kubit is currently an early-stage project. The source version is `1.4.1`.
+Kubit is currently an early-stage project. The source version is `1.4.2`.
 Production use requires an explicit review of high availability, database
 recovery, provider coverage, resource sizing, and cluster security policy.
 
@@ -72,7 +72,7 @@ docker build -t kubit:dev .
 ```
 
 The public manifests and Helm chart use the release image
-`ghcr.io/lcontreras48/kubit:1.4.1`. Release tags build the application image,
+`ghcr.io/lcontreras48/kubit:1.4.2`. Release tags build the application image,
 publish immutable version tags to GHCR, package the Helm chart, and create the
 corresponding GitHub Release from this repository.
 

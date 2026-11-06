@@ -6,6 +6,8 @@ metadata:
     {{- include "kubit.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: {{ .Values.deploymentStrategy }}
   selector:
     matchLabels:
       {{- include "kubit.selectorLabels" . | nindent 6 }}
